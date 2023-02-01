@@ -21,7 +21,7 @@ exports 其他模块需要使用这个模块的组件，需要把这个组件给
 providers 为模块提供服务，服务包括外部请求，一些可复用的逻辑。这里注入了服务，允许我们在组件内使用Angular的依赖注入系统去注册类
 bootstrap 会根据这个数组的组件创建组件树的根组件，一般位于 根模块中并且只有一个。
 
-在index.html 页面中使用了一个 标签 app-root, 在AppComponent中selector 指定的是 如果想渲染这个组件，该怎么使用它。详细的内容后面写。
+在index.html 页面中使用了一个 标签 app-root, 在这个标签中创造了一个AppComponent实例，简单介绍@Component
 ```
 @Component({
   selector: 'app-root',
@@ -30,3 +30,6 @@ bootstrap 会根据这个数组的组件创建组件树的根组件，一般位�
 })
 export class AppComponent {}
 ```
+selector 是一个css选择器，一旦在HTML中找到了这个选择器对应的标签，就会创建并插入一个组件的实例。
+templateUrl 该组件的 HTML 模板文件相对于这个组件文件的地址 可以使用template 内联模版
+styleUrls 该组件的样式 可以使用 style 內联样式。
