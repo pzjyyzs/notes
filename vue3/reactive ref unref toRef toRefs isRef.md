@@ -33,4 +33,47 @@ return里面不需要.value。
 # unref
 使用这个 会判断你传过来的值是不是一个响应式的值，如果是返回 .value,如果不是则返回对象本身。
 
+# toRef
+把响应式数据的其中一项属性进行单独的提取出来进行，保持一个响应式的到原对象。如果有其他componsition api需要用到某个属性，可以保持响应式。
+```
+<script>
+const state = reactive({
+    name: 'test',
+    age: 12
+});
+const nameRef = toRef(state, 'name');
+nameRef.value = 'change';
+console.log(state.name);
+
+state.name = 'test';
+console.log(nameRef.value);
+<script>
+```
+
+# toRefs
+转化一个响应式的对象成一个普通的对象，普通的对象的属性具有响应式，保持响应式到响应式数据。
+```
+<script>
+export default {
+    name: 'App',
+    steup() {
+        const state = reactive({
+            name: '张三',
+            age: 30
+        });
+        const stateRefs = toRefs(state);
+        console.log({ ...stateRefs });
+        console.log(isRef(stateRefs, stateRefs.name))
+        return {
+            ...stateRefs // 这样可以不用state.name 直接name
+        }
+    }
+}
+</script>
+```
+
+# isRef
+判断一个值是不是 ref
+
+
 https://stackblitz.com/edit/vue-eywdhd?file=src%2Fcomponents%2FHelloWorld.vue
