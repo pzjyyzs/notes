@@ -97,3 +97,227 @@ p.then((msg) => {
 
 # 手写
 promiseaplus.com
+
+# 生成器
+
+前提 
+	generator 生成器函数 -> 生成一个东西的函数 -> function *函数名 () {}
+	iterator 迭代器对象
+	yield 产出一个值 暂停标识
+```
+function *generator() {
+	yield '123';
+	yield '姓名：34'
+}
+
+const iterator = generator();
+let res = iterator.next();
+res = iterator.next();
+// res { value: 123, done: false }
+```
+生成器返回一个迭代器, 迭代器可以使用 next() 获得一个对象，对象有value和done, value是yield返回的值，done代表是否返回结束。
+
+## 异步迭代
+
+代码
+```
+const fs = require('fs').promises;
+
+  
+
+function *getUserClasses (uid) {
+
+let userDatas = yield fs.readFile('./data/user.json');
+
+userData = JSON.parse(userData);
+
+const userData = userDatas.find(user => user.id === uid);
+
+let classDatas = yield fs.readFile('./data/class.json');
+
+classDatas = JSON.parse(classDatas);
+
+  
+
+let userClassData = {
+
+id: userData.id,
+
+name: userData.name,
+
+classes: []
+
+}
+
+  
+
+classDatas.map(c => {
+
+const studentsArr = JSON.parse.parse(c.students);
+
+studentsArr.map(s => {
+
+if (s === uid) {
+
+userClassData.classes.push({
+
+id: c.id,
+
+name: c.name
+
+})
+
+}
+
+})
+
+})
+
+  
+
+return userClassData
+
+}
+
+  
+
+const it = getUserClasses(1);
+
+console.log('123', it.next())
+```
+执行到yield暂停，调用next才赋值，再执行到yield。
+如果需要拿到所有结果需要
+```
+const it = getUserClasses(1);
+
+const { value, done } = it.next();
+
+value.then(res => {
+
+console.log(res.toString('utf-8'));
+
+const { value, done } = it.next(res);
+
+console.log(value)
+
+})
+```
+ 需要嵌套调用比较麻烦。
+ 可以使用co库，来异步迭代，这也是async，await的用法
+```
+function co(iterator) {
+
+return new Promise((resolve, reject) => {
+
+function walk(data) {
+
+const { value, done } = iterator.next(data);
+
+if (!done) {
+
+Promise.resolve(value).then(res => {
+
+walk(res);
+
+}, reject)
+
+} else {
+
+resolve(value)
+
+}
+co(getUserClasses(1)).then(res => {
+
+console.log(res)
+
+}).catch((err) => {
+
+console.log(err);
+
+})
+
+}
+
+  
+
+walk()
+
+})
+
+}
+
+//async await
+async function getUserClasses(uid) {
+
+let userDatas = await fs.readFile('./data/user.json');
+
+userDatas = JSON.parse(userDatas);
+
+const userData = userDatas.find(user => user.id === uid);
+
+let classDatas = await fs.readFile('./data/class.json');
+
+classDatas = JSON.parse(classDatas);
+
+  
+
+let userClassData = {
+
+id: userData.id,
+
+name: userData.name,
+
+classes: []
+
+}
+
+  
+
+classDatas.map(c => {
+
+const studentsArr = JSON.parse(c.students);
+
+studentsArr.map(s => {
+
+if (s === uid) {
+
+userClassData.classes.push({
+
+id: c.id,
+
+name: c.name
+
+})
+
+}
+
+})
+
+})
+
+  
+
+return userClassData
+
+}
+
+  
+
+getUserClasses(1).then((res) => {
+
+console.log(res)
+
+}).catch(error => {
+
+console.log('error', error)
+
+})
+```
+await只在async函数中使用，await后面接的是Promise函数，若是普通函数，则无区别。
+错误处理
+```
+const response = await axios.get('/xxx').then(null, errorHandle)
+console.log(response);
+```
+成功处理在左边，错误处理在右边。
+await 在for循环里是串行的(一个接着一个)，在forEach循环里是并行的(同时做)
